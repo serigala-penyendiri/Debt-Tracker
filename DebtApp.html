@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Manajemen Hutang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        :root {
+            --primary: #0a2463;
+            --secondary: #3e92cc;
+            --accent: #2a628f;
+            --light: #d8e1e9;
+            --dark: #1e1e2f;
+            --success: #00b894;
+            --danger: #ff4757;
+            --warning: #ffc107;
+            --info: #74b9ff;
+        }
+        body {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 15px;
+            font-size: 16px;
+            position: relative;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+            text-shadow: 0 0 20px rgba(62, 146, 204, 0.5);
+        }
+        .app-title {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .app-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-direction: column;
+        }
+        .input-group {
+            flex: 1;
+        }
+        /* Calendar styles */
+        .calendar-container {
+            margin-bottom: 15px;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        .calendar-day-header {
+            font-weight: 600;
+            color: var(--light);
+            padding: 5px;
+        }
+        .calendar-day-number {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .calendar-day-number:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .calendar-day-number.today {
+            background: var(--secondary);
+            color: white;
+            font-weight: 600;
+        }
+        .calendar-day-number.has-debt {
+            position: relative;
+        }
+        .calendar-day-number.has-debt::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+        
+        .calendar-day-number.has-debt.warning::after {
+            background: var(--warning);
+        }
+        .calendar-day-number.has-debt.danger::after {
+            background: var(--danger);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--light);
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(62, 146, 204, 0.3);
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(62, 146, 204, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(120deg, var(--danger), #84fab0 0%, #8fd3f4 100%);
+            color: black;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 127, 0.4);
+        }
+        .btn-info {
+            background: linear-gradient(45deg, var(--info), #0984e3);
+            color: white;
+        }
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.4);
+        }
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .total-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--warning);
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+        .debt-list {
+            max-height: 350px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .debt-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .debt-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .debt-info {
+            flex: 1;
+        }
+        .debt-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .debt-amount {
+            font-size: 1rem;
+            color: var(--warning);
+            font-weight: 700;
+        }
+        .debt-date {
+            font-size: 0.8rem;
+            color: var(--light);
+            opacity: 0.8;
+        }
+        .debt-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+        .btn-edit {
+            background: linear-gradient(45deg, var(--accent), #4a90e2);
+            color: white;
+        }
+        .btn-edit:hover {
+            box-shadow: 0 5px 15px rgba(42, 98, 143, 0.4);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            opacity: 0.5;
+        }
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 184, 148, 0.9);
+            color: white;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 3000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            font-size: 0.9rem;
+            max-width: 80%;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification.error {
+            background: rgba(255, 71, 87, 0.9);
+        }
+        .notification.warning {
+            background: rgba(255, 193, 7, 0.9);
+        }
+        /* Tambahkan ini untuk teks bergerak */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 35s linear infinite;
+            color: var(--light);
+            font-size: 0.9rem;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        /* Footer styles */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .footer-logo {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+        .footer-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+        }
+        /* Mobile-first responsive design */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .app-title {
+                font-size: 2.2rem;
+            }
+            
+            .form-group {
+                flex-direction: row;
+            }
+            
+            .summary {
+                flex-wrap: nowrap;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+        /* Search styles */
+        .search-container {
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+        .search-input {
+            display: flex;
+            gap: 15px;
+        }
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .search-field {
+            padding-left: 35px;
+        }
+        .search-results {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .search-total {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--success);
+            margin-bottom: 10px;
+            text-align: right;
+        }
+        .search-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+        }
+        .search-name {
+            font-weight: 500;
+        }
+        .search-amount {
+            color: var(--warning);
+            font-weight: 600;
+        }
+        
+        /* Detail view styles */
+        .detail-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .detail-view.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .detail-content {
+            background: var(--dark);
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 20px rgba(62, 146, 204, 0.3);
+        }
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .detail-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .detail-close {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .detail-close:hover {
+            color: var(--danger);
+        }
+        .detail-info {
+            margin-bottom: 15px;
+        }
+        .detail-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .detail-info-label {
+            color: var(--light);
+            opacity: 0.8;
+        }
+        .detail-info-value {
+            font-weight: 600;
+        }
+        .detail-description {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .detail-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        /* Date display styles - PERBAIKAN UTAMA */
+        .date-display-container {
+            flex: 1;
+        }
+        .date-display {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .date-display-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .date-display-value {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        .date-display-icon {
+            color: var(--info);
+        }
+        /* Menambahkan margin top untuk ikon pencarian */
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <h1 class="app-title">Debt Tracker</h1>
+            <p class="app-subtitle">Manajemen Penulisan Hutang By Lone Wolf</p>
+        </div>
+        <div class="card">
+            <div class="form-group">
+                <div class="input-group">
+                    <label for="debtName">Nama</label>
+                    <input type="text" id="debtName" placeholder="Masukkan nama">
+                </div>
+                <div class="input-group">
+                    <label for="debtAmount">Jumlah Hutang (Rp)</label>
+                    <input type="number" id="debtAmount" placeholder="Masukkan jumlah">
+                </div>
+                <div class="input-group">
+                    <label for="debtDescription">Deskripsi</label>
+                    <textarea id="debtDescription" placeholder="Masukkan deskripsi" rows="2"></textarea>
+                </div>
+                <div class="input-group date-display-container">
+                    <label>Tanggal</label>
+                    <div class="date-display">
+                        <div class="date-display-text">
+                            <i class="fas fa-calendar-day date-display-icon"></i>
+                            <span class="date-display-value" id="currentDate"></span>
+                        </div>
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addDebt()">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
+            </div>
+        </div>
+        <!-- Tambahkan teks bergerak di sini -->
+        <div class="marquee-container">
+            <div class="marquee-content">
+                Selamat datang di aplikasi Debt Tracker - Aplikasi manajemen hutang terbaik di Indonesia • Fitur lengkap untuk mengelola semua hutang Anda • Desain modern dan mudah digunakan • Simpan data Anda secara aman di perangkat Anda • Tambah, edit, dan hapus hutang dengan mudah • Debt Tracker membantu Anda mengelola keuangan dengan lebih baik dibuat oleh Lone Wolf
+            </div>
+        </div>
+        <!-- Fitur Pencarian -->
+        <div class="card search-container">
+            <h3><i class="fas fa-search mt-2"></i> Pencarian </h3>
+            <div class="search-input">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-field" placeholder="Cari nama..." onkeyup="searchDebts()">
+                </div>
+                <button class="btn btn-primary" onclick="clearSearch()">
+                    <i class="fas fa-times"></i> Bersihkan
+                </button>
+            </div>
+            <div class="search-results" id="searchResults" style="display: none;">
+                <div class="search-total" id="searchTotal"></div>
+                <div id="searchItems"></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="summary">
+                <div>
+                    <h3>Total Hutang</h3>
+                    <div class="total-amount" id="totalAmount">Rp 0</div>
+                </div>
+                <button class="btn btn-danger" onclick="clearAllDebts()">
+                    <i class="fas fa-trash"></i> Hapus Semua
+                </button>
+            </div>
+            <div class="debt-list" id="debtList">
+                <!-- Daftar hutang akan ditampilkan di sini -->
+            </div>
+        </div>
+        <!-- Tambahkan kalender di sini -->
+        <div class="card calendar-container">
+            <div class="calendar-header">
+                <div class="calendar-title" id="calendarTitle">Januari 2024</div>
+                <div class="calendar-nav">
+                    <button class="btn btn-sm btn-info" onclick="changeCalendarMonth(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-sm btn-info" onclick="changeCalendarMonth(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Kalender akan diisi oleh JavaScript -->
+            </div>
+        </div>
+        <!-- Tambahkan footer di sini -->
+        <div class="footer">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-money-bill-wave"></i> Debt App
+                </div>
+                <p class="footer-text">© 2025 Debt Tracker By <b> LW</b></p>
+                <p class="footer-text">Versi 2.0.0</p>
+            </div>
+        </div>
+    </div>
+    <!-- Detail View -->
+    <div class="detail-view" id="detailView">
+        <div class="detail-content">
+            <div class="detail-header">
+                <div class="detail-title">Detail Hutang</div>
+                <button class="detail-close" onclick="closeDetailView()">&times;</button>
+            </div>
+            <div class="detail-info">
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Nama</div>
+                    <div class="detail-info-value" id="detailName">-</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Jumlah Hutang</div>
+                    <div class="detail-info-value" id="detailAmount">-</div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-label">Tanggal</div>
+                    <div class="detail-info-value" id="detailDate">-</div>
+                </div>
+            </div>
+            <div class="detail-description">
+                <div class="detail-info-label">Deskripsi</div>
+                <div id="detailDescription">-</div>
+            </div>
+            <div class="detail-actions">
+                <button class="btn btn-sm btn-edit" onclick="editDebtFromDetail()">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteDebtFromDetail()">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="notification" id="notification">
+        <span id="notificationText"></span>
+    </div>
+    <script>
+        // Inisialisasi data hutang
+        let debts = JSON.parse(localStorage.getItem('debts')) || [];
+        let editingId = null;
+        let selectedDebtId = null;
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        
+        // Format tanggal ke zona waktu Indonesia Barat (WIB)
+        function formatDateToWIB(date) {
+            return new Date(date).toLocaleDateString('id-ID', {
+                timeZone: 'Asia/Jakarta',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        // Format waktu ke zona waktu Indonesia Barat (WIB)
+        function formatTimeToWIB(date) {
+            return new Date(date).toLocaleTimeString('id-ID', {
+                timeZone: 'Asia/Jakarta',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Update tampilan tanggal saat ini
+        function updateCurrentDate() {
+            const now = new Date();
+            const dateElement = document.getElementById('currentDate');
+            dateElement.textContent = formatDateToWIB(now) + ', ' + formatTimeToWIB(now);
+        }
+        
+        // Format angka ke mata uang Rupiah
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Tampilkan notifikasi
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notification.className = isError ? 'notification error show' : 'notification show';
+            notificationText.textContent = message;
+            
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 3000);
+        }
+        
+        // Tambah hutang baru
+        function addDebt() {
+            const nameInput = document.getElementById('debtName');
+            const amountInput = document.getElementById('debtAmount');
+            const descriptionInput = document.getElementById('debtDescription');
+            
+            const name = nameInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            const description = descriptionInput.value.trim();
+            
+            // Gunakan tanggal saat ini dalam zona waktu WIB
+            const date = new Date();
+            
+            if (!name) {
+                showNotification('Nama hutang tidak boleh kosong!', true);
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Jumlah hutang harus lebih dari 0!', true);
+                return;
+            }
+            
+            if (editingId !== null) {
+                // Update hutang yang ada
+                const index = debts.findIndex(debt => debt.id === editingId);
+                if (index !== -1) {
+                    debts[index].name = name;
+                    debts[index].amount = amount;
+                    debts[index].description = description;
+                    debts[index].date = date.toISOString();
+                    showNotification('Hutang berhasil diperbarui!');
+                }
+                editingId = null;
+                document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-plus"></i> Tambah';
+            } else {
+                // Tambah hutang baru
+                const newDebt = {
+                    id: Date.now(),
+                    name: name,
+                    amount: amount,
+                    description: description,
+                    date: date.toISOString()
+                };
+                debts.push(newDebt);
+                showNotification('Hutang baru berhasil ditambahkan!');
+            }
+            
+            // Reset input
+            nameInput.value = '';
+            amountInput.value = '';
+            descriptionInput.value = '';
+            updateUI();
+            saveToLocalStorage();
+            renderCalendar();
+        }
+        
+        // Edit hutang
+        function editDebt(id) {
+            const debt = debts.find(d => d.id === id);
+            if (debt) {
+                document.getElementById('debtName').value = debt.name;
+                document.getElementById('debtAmount').value = debt.amount;
+                document.getElementById('debtDescription').value = debt.description || '';
+                
+                editingId = id;
+                document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-save"></i> Simpan';
+                showNotification('Edit hutang - Silakan perbarui data');
+            }
+        }
+        
+        // Edit hutang dari detail view
+        function editDebtFromDetail() {
+            if (selectedDebtId) {
+                closeDetailView();
+                editDebt(selectedDebtId);
+            }
+        }
+        
+        // Hapus hutang
+        function deleteDebt(id) {
+            debts = debts.filter(debt => debt.id !== id);
+            updateUI();
+            saveToLocalStorage();
+            renderCalendar();
+            showNotification('Hutang berhasil dihapus!');
+        }
+        
+        // Hapus hutang dari detail view
+        function deleteDebtFromDetail() {
+            if (selectedDebtId) {
+                closeDetailView();
+                deleteDebt(selectedDebtId);
+            }
+        }
+        
+        // Hapus semua hutang
+        function clearAllDebts() {
+            if (debts.length === 0) {
+                showNotification('Tidak ada hutang untuk dihapus!', true);
+                return;
+            }
+            
+            if (confirm('Apakah Anda yakin ingin menghapus semua hutang?')) {
+                debts = [];
+                updateUI();
+                saveToLocalStorage();
+                renderCalendar();
+                showNotification('Semua hutang berhasil dihapus!');
+            }
+        }
+        
+        // Update tampilan UI
+        function updateUI() {
+            const debtList = document.getElementById('debtList');
+            const totalAmount = document.getElementById('totalAmount');
+            
+            // Update tanggal saat ini
+            updateCurrentDate();
+            
+            // Hitung total hutang
+            const total = debts.reduce((sum, debt) => sum + debt.amount, 0);
+            totalAmount.textContent = formatCurrency(total);
+            
+            // Tampilkan daftar hutang
+            if (debts.length === 0) {
+                debtList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <h3>Belum Ada Hutang</h3>
+                        <p>Tambahkan hutang pertama Anda di atas</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            debtList.innerHTML = debts.map(debt => {
+                const date = formatDateToWIB(debt.date);
+                return `
+                    <div class="debt-item" onclick="showDetailView(${debt.id})">
+                        <div class="debt-info">
+                            <div class="debt-name">${debt.name}</div>
+                            <div class="debt-date">${date}</div>
+                            <div class="debt-amount">${formatCurrency(debt.amount)}</div>
+                        </div>
+                        <div class="debt-actions">
+                            <button class="btn btn-sm btn-edit" onclick="event.stopPropagation(); editDebt(${debt.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteDebt(${debt.id})">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Simpan ke localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('debts', JSON.stringify(debts));
+        }
+        
+        // Pencarian hutang
+        function searchDebts() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            const searchResults = document.getElementById('searchResults');
+            const searchItems = document.getElementById('searchItems');
+            const searchTotal = document.getElementById('searchTotal');
+            
+            if (!searchTerm) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            // Filter hutang berdasarkan nama
+            const filteredDebts = debts.filter(debt => 
+                debt.name.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filteredDebts.length === 0) {
+                searchItems.innerHTML = '<p class="empty-state">Tidak ada hasil ditemukan</p>';
+                searchTotal.textContent = 'Total: Rp 0';
+                searchResults.style.display = 'block';
+                return;
+            }
+            
+            // Hitung total untuk hasil pencarian
+            const searchTotalAmount = filteredDebts.reduce((sum, debt) => sum + debt.amount, 0);
+            
+            // Tampilkan hasil pencarian
+            searchItems.innerHTML = filteredDebts.map(debt => {
+                const date = formatDateToWIB(debt.date);
+                return `
+                    <div class="search-item">
+                        <div class="search-name">${debt.name}</div>
+                        <div class="search-amount">${formatCurrency(debt.amount)}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            searchTotal.textContent = `Total: ${formatCurrency(searchTotalAmount)}`;
+            searchResults.style.display = 'block';
+        }
+        
+        // Bersihkan pencarian
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+        
+        // Tampilkan detail hutang
+        function showDetailView(id) {
+            const debt = debts.find(d => d.id === id);
+            if (!debt) return;
+            
+            selectedDebtId = id;
+            
+            document.getElementById('detailName').textContent = debt.name;
+            document.getElementById('detailAmount').textContent = formatCurrency(debt.amount);
+            
+            const date = formatDateToWIB(debt.date);
+            document.getElementById('detailDate').textContent = date;
+            
+            document.getElementById('detailDescription').textContent = debt.description || 'Tidak ada deskripsi';
+            
+            document.getElementById('detailView').classList.add('active');
+        }
+        
+        // Tutup detail view
+        function closeDetailView() {
+            document.getElementById('detailView').classList.remove('active');
+            selectedDebtId = null;
+        }
+        
+        // Ubah bulan kalender utama
+        function changeCalendarMonth(change) {
+            currentMonth += change;
+            
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            
+            renderCalendar();
+        }
+        
+        // Render kalender utama
+        function renderCalendar() {
+            const calendarTitle = document.getElementById('calendarTitle');
+            const calendarGrid = document.getElementById('calendarGrid');
+            
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // Clear calendar grid
+            calendarGrid.innerHTML = '';
+            
+            // Add day headers
+            const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+            dayNames.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day calendar-day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            
+            // Get first day of month and total days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Add empty cells for days before first day
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // Add days of month
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day-number';
+                dayElement.textContent = i;
+                
+                // Check if this day has debts
+                const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+                const hasDebtOnDay = debts.some(debt => {
+                    const debtDate = new Date(debt.date);
+                    return debtDate.getFullYear() === currentYear && 
+                           debtDate.getMonth() === currentMonth && 
+                           debtDate.getDate() === i;
+                });
+                
+                if (hasDebtOnDay) {
+                    dayElement.classList.add('has-debt');
+                    
+                    // Add warning class for debts due soon (within 7 days)
+                    const debtDate = new Date(dateStr);
+                    const daysUntilDue = Math.ceil((debtDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysUntilDue <= 7 && daysUntilDue >= 0) {
+                        dayElement.classList.add('warning');
+                    } else if (daysUntilDue < 0) {
+                        dayElement.classList.add('danger');
+                    }
+                }
+                
+                // Highlight today
+                if (today.getFullYear() === currentYear && 
+                    today.getMonth() === currentMonth && 
+                    today.getDate() === i) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Add click event to show debts for this day
+                dayElement.addEventListener('click', () => {
+                    const debtsOnDay = debts.filter(debt => {
+                        const debtDate = new Date(debt.date);
+                        return debtDate.getFullYear() === currentYear && 
+                               debtDate.getMonth() === currentMonth && 
+                               debtDate.getDate() === i;
+                    });
+                    
+                    if (debtsOnDay.length > 0) {
+                        // Show first debt in detail view
+                        showDetailView(debtsOnDay[0].id);
+                    } else {
+                        showNotification(`Tidak ada hutang pada ${i} ${monthNames[currentMonth]} ${currentYear}`);
+                    }
+                });
+                
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+        
+        // Inisialisasi aplikasi
+        function init() {
+            updateUI();
+            
+            // Update tanggal setiap detik
+            setInterval(updateCurrentDate, 1000);
+            
+            // Tambahkan event listener untuk input
+            document.getElementById('debtName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('debtAmount').focus();
+                }
+            });
+            
+            document.getElementById('debtAmount').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('debtDescription').focus();
+                }
+            });
+            
+            document.getElementById('debtDescription').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    // Fokus ke tombol tambah
+                    document.querySelector('.btn-primary').focus();
+                }
+            });
+            
+            // Render calendar
+            renderCalendar();
+        }
+        
+        // Jalankan aplikasi saat halaman dimuat
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
